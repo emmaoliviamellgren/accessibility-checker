@@ -14,7 +14,7 @@ const Result = ({ result, error, setError }: Props) => {
 	}
 
 	const { lighthouseResult, loadingExperience } = result;
-    
+
 	const renderMetric = (
 		label: string,
 		value?: string | null,
@@ -114,42 +114,44 @@ const Result = ({ result, error, setError }: Props) => {
 
 	return (
 		<section className="flex flex-col gap-6 mt-12 px-4">
-			{loadingExperience && loadingExperience.metrics && (
-				<>
-					<h1 className="text-lg font-semibold">
-						User Experience Metrics
-					</h1>
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+			<h1 className="text-lg font-semibold">User Experience Metrics</h1>
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+				{loadingExperience?.metrics ? (
+					<>
 						{uxMetrics.map((m, i) =>
 							renderMetric(m.label, m.value, i)
 						)}
-					</div>
-				</>
-			)}
+					</>
+				) : (
+					<p className="text-sm text-gray-500">No data available</p>
+				)}
+			</div>
 
-			{lighthouseResult && lighthouseResult.audits && (
-				<>
-					<h1 className="text-lg font-semibold">
-						Performance Audits
-					</h1>
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+			<h1 className="text-lg font-semibold">Performance Audits</h1>
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+				{lighthouseResult?.audits ? (
+					<>
 						{auditMetrics.map((m, i) =>
 							renderMetric(m.label, m.value, i + uxMetrics.length)
 						)}
-					</div>
-				</>
-			)}
+					</>
+				) : (
+					<p className="text-sm text-gray-500">No data available</p>
+				)}
+			</div>
 
-			{lighthouseResult?.categories && (
-				<>
-					<h1 className="text-lg font-semibold">Overall Scores</h1>
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+			<h1 className="text-lg font-semibold">Overall Scores</h1>
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+				{lighthouseResult?.categories ? (
+					<>
 						{categoryMetrics.map((m, i) =>
 							renderMetric(m.label, m.value, i)
 						)}
-					</div>
-				</>
-			)}
+					</>
+				) : (
+					<p className="text-sm text-gray-500">No data available</p>
+				)}
+			</div>
 
 			{error && <p className="text-sm text-red-900">{error}</p>}
 		</section>
