@@ -42,13 +42,13 @@ const Result = ({ result, setError }: Props) => {
 				label.includes("Best Practices") ||
 				label.includes("SEO")
 			) {
-				// For percentage scores, extract the number
+				// Extracting number for percentage scores
 				const percentageScores = value.match(/(\d+)%/);
 				if (percentageScores) {
 					rating = ratePerformanceScore(percentageScores[1]);
 				}
 			} else {
-				// For time-based metrics (Performance Audits)
+				// For Performance Audits (time-based metrics)
 				rating = rateTimeBasedMetric(label, value);
 			}
 		}
@@ -60,7 +60,7 @@ const Result = ({ result, setError }: Props) => {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: (index ?? 0) * 0.1, duration: 0.4 }}
 				className="flex flex-col rounded-lg p-4 space-y-3 justify-between shadow-sm bg-gray-50/10 outline outline-gray-50/20 transition-colors w-[300px] h-auto">
-				<div className="flex flex-1 gap-4 items-baseline justify-between">
+				<div className="flex flex-1 gap-4 items-center justify-between">
 					<p className="text-sm text-gray-300/60">{label}</p>
 					<div className="flex items-center gap-2 flex-nowrap">
 						{value && value !== "No data available" && rating && (

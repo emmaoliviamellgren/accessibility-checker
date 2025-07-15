@@ -160,7 +160,7 @@ const InputBox = () => {
 						<Button
 							variant="outline"
 							size="icon"
-							className="cursor-pointer size-6 text-gray-50/60 bg-gray-50/10 ring-gray-50/20 ring border-0"
+							className="cursor-pointer size-6 p-0.5 rounded-full hover:ring-gray-50/80 hover:text-gray-50/80 text-gray-50/60 bg-gray-50/10 ring-gray-50/20 ring border-0"
 							onClick={retryRequest}>
 							<RotateCcw className="size-3" />
 						</Button>
