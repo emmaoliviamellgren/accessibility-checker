@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Accessibility Checker",
-	description: "Check the accessibility of your web pages",
+	title: "Performance Checker",
+	description: "Check the performance & accessibility of your web pages",
 };
 
 export default function RootLayout({

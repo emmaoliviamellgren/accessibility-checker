@@ -1,5 +1,15 @@
+import { Badge } from "@/components/ui/badge";
 import { PageSpeedModel } from "../pagespeedModel";
 import { motion } from "framer-motion";
+import { BadgeQuestionMark } from "lucide-react";
+import {
+	rateUXCategory,
+	ratePerformanceScore,
+	informativeLinks,
+	getBadgeClasses,
+	rateTimeBasedMetric,
+	Rating,
+} from "../utils";
 
 interface Props {
 	result: Partial<PageSpeedModel>;
@@ -7,9 +17,9 @@ interface Props {
 	setError: (error: string | null) => void;
 }
 
-const Result = ({ result, error, setError }: Props) => {
+const Result = ({ result, setError }: Props) => {
 	if (!result || (!result.lighthouseResult && !result.loadingExperience)) {
-		setError("An error occurred :(");
+		setError("An error occurred");
 		return null;
 	}
 
@@ -18,30 +28,102 @@ const Result = ({ result, error, setError }: Props) => {
 	const renderMetric = (
 		label: string,
 		value?: string | null,
-		index?: number
-	) =>
-		value ? (
+		index?: number,
+		isUXMetric: boolean = false
+	) => {
+		let rating: Rating | null = null;
+
+		if (value && value !== "No data available") {
+			if (isUXMetric) {
+				rating = rateUXCategory(value);
+			} else if (
+				label.includes("Performance") ||
+				label.includes("Accessibility") ||
+				label.includes("Best Practices") ||
+				label.includes("SEO")
+			) {
+				// For percentage scores, extract the number
+				const percentageScores = value.match(/(\d+)%/);
+				if (percentageScores) {
+					rating = ratePerformanceScore(percentageScores[1]);
+				}
+			} else {
+				// For time-based metrics (Performance Audits)
+				rating = rateTimeBasedMetric(label, value);
+			}
+		}
+
+		return (
 			<motion.div
 				key={label}
 				initial={{ opacity: 0, y: -10 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: (index ?? 0) * 0.1, duration: 0.4 }}
-				className="flex flex-col border rounded-lg p-4 shadow-sm bg-white">
-				<p className="text-sm text-gray-500">{label}</p>
-				<p className="font-medium text-lg">{value}</p>
+				className="flex flex-col rounded-lg p-4 space-y-3 justify-between shadow-sm bg-gray-50/10 outline outline-gray-50/20 transition-colors w-[300px] h-auto">
+				<div className="flex flex-1 gap-4 items-baseline justify-between">
+					<p className="text-sm text-gray-300/60">{label}</p>
+					<div className="flex items-center gap-2 flex-nowrap">
+						{value && value !== "No data available" && rating && (
+							<Badge
+								className={`text-[9px] tracking-tight w-fit uppercase ${getBadgeClasses(
+									rating
+								)}`}>
+								{rating}
+							</Badge>
+						)}
+						{informativeLinks[
+							label as keyof typeof informativeLinks
+						] && (
+							<a
+								href={
+									informativeLinks[
+										label as keyof typeof informativeLinks
+									]
+								}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="bg-gray-50/10 p-0.5 rounded-full outline outline-gray-50/20 hover:outline-gray-50/80 hover:text-gray-50/80 text-gray-50/40 transition-colors">
+								<BadgeQuestionMark size={16} />
+							</a>
+						)}
+					</div>
+				</div>
+
+				{value && value !== "No data available" ? (
+					<>
+						<p className="font-light text-xl text-gray-50">
+							{value}
+						</p>
+					</>
+				) : (
+					<p className="text-sm text-gray-50/20 font-light">
+						No data available
+					</p>
+				)}
 			</motion.div>
-		) : null;
+		);
+	};
+
+	const capitalize = (str: string) => {
+		return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+	};
 
 	const uxMetrics = [
 		{
 			label: "First Contentful Paint (Category)",
-			value: loadingExperience?.metrics?.FIRST_CONTENTFUL_PAINT_MS
-				?.category,
+			value:
+				loadingExperience?.metrics?.FIRST_CONTENTFUL_PAINT_MS &&
+				capitalize(
+					loadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS.category
+				),
 		},
 		{
 			label: "Interaction to Next Paint (Category)",
-			value: loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT
-				?.category,
+			value:
+				loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT &&
+				capitalize(
+					loadingExperience.metrics.INTERACTION_TO_NEXT_PAINT.category
+				),
 		},
 	];
 
@@ -113,47 +195,38 @@ const Result = ({ result, error, setError }: Props) => {
 	];
 
 	return (
-		<section className="flex flex-col gap-6 mt-12 px-4">
-			<h1 className="text-lg font-semibold">User Experience Metrics</h1>
+		<section className="flex flex-col gap-6 mt-12 px-4 md:px-8 lg:px-12">
+			<h1 className="text-base font-medium text-gray-50">
+				User Experience Metrics
+			</h1>
 			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-				{loadingExperience?.metrics ? (
-					<>
-						{uxMetrics.map((m, i) =>
-							renderMetric(m.label, m.value, i)
-						)}
-					</>
-				) : (
-					<p className="text-sm text-gray-500">No data available</p>
+				{uxMetrics.map((m, i) =>
+					renderMetric(m.label, m.value, i, true)
 				)}
 			</div>
 
-			<h1 className="text-lg font-semibold">Performance Audits</h1>
+			<h1 className="text-base font-medium text-gray-50">
+				Performance Audits
+			</h1>
 			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-				{lighthouseResult?.audits ? (
-					<>
-						{auditMetrics.map((m, i) =>
-							renderMetric(m.label, m.value, i + uxMetrics.length)
-						)}
-					</>
-				) : (
-					<p className="text-sm text-gray-500">No data available</p>
+				{auditMetrics.map((m, i) =>
+					renderMetric(m.label, m.value, i + uxMetrics.length, false)
 				)}
 			</div>
 
-			<h1 className="text-lg font-semibold">Overall Scores</h1>
+			<h1 className="text-base font-medium text-gray-50">
+				Overall Scores
+			</h1>
 			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-				{lighthouseResult?.categories ? (
-					<>
-						{categoryMetrics.map((m, i) =>
-							renderMetric(m.label, m.value, i)
-						)}
-					</>
-				) : (
-					<p className="text-sm text-gray-500">No data available</p>
+				{categoryMetrics.map((m, i) =>
+					renderMetric(
+						m.label,
+						m.value,
+						i + uxMetrics.length + auditMetrics.length,
+						false
+					)
 				)}
 			</div>
-
-			{error && <p className="text-sm text-red-900">{error}</p>}
 		</section>
 	);
 };

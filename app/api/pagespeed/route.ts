@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 		const res = await fetch(
 			`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
 				url
-			)}&key=${
+			)}&category=performance&category=accessibility&category=best-practices&category=seo&key=${
 				process.env.PAGESPEED_API_KEY
 			}`
 		);
